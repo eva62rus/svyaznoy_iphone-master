@@ -26,7 +26,7 @@ class Iphone:
         self.price = price
 
 
-def init_driver(headless, profile_path, profile_dir_name):
+def init_driver(headless, profile_path=None, profile_dir_name=None):
     options = Options()
     if profile_path is not None and profile_dir_name is not None:
         options.add_argument(profile_path)
@@ -95,7 +95,7 @@ def parsing_products_info(products_info, products_price):
 
 
 def main():
-    driver = init_driver(True, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
+    driver = init_driver(False, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
     driver.get(SRC_URL)
     page_count = get_page_count(driver)
     urls = [get_url_for_page(i) for i in range(1, page_count + 1)]
@@ -103,7 +103,7 @@ def main():
     for url in urls:
         if url != SRC_URL:
             driver.get(url)
-            sleep(1)
+
         products_info = get_products_info(driver)
         products_price = get_products_price(driver)
         products += parsing_products_info(products_info, products_price)
