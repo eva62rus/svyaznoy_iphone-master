@@ -1,3 +1,4 @@
+import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -7,6 +8,8 @@ import enum
 
 SRC_URL = 'https://www.svyaznoy.ru/catalog/phone/225/apple'
 CHROME_DRIVER_PATH = '../chrome-driver/chromedriver.exe'
+CHROME_PROFILE_PATH = r"user-data-dir=C:\\Users\\Victor\\AppData\\Local\\Google\\Chrome\\User Data\\"
+CHROME_PROFILE_DIR_NAME = '--profile-directory=Default'
 
 
 class ElemXpath(enum.Enum):
@@ -23,8 +26,11 @@ class Iphone:
         self.price = price
 
 
-def init_driver(headless):
+def init_driver(headless, profile_path, profile_dir_name):
     options = Options()
+    if profile_path is not None and profile_dir_name is not None:
+        options.add_argument(profile_path)
+        options.add_argument(profile_dir_name)
     if headless:
         options.add_argument('--headless=new')
     return webdriver.Chrome(options=options)
@@ -89,7 +95,7 @@ def parsing_products_info(products_info, products_price):
 
 
 def main():
-    driver = init_driver(headless=False)
+    driver = init_driver(True, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
     driver.get(SRC_URL)
     page_count = get_page_count(driver)
     urls = [get_url_for_page(i) for i in range(1, page_count + 1)]
@@ -97,7 +103,7 @@ def main():
     for url in urls:
         if url != SRC_URL:
             driver.get(url)
-            sleep(2)
+            sleep(1)
         products_info = get_products_info(driver)
         products_price = get_products_price(driver)
         products += parsing_products_info(products_info, products_price)
