@@ -17,10 +17,10 @@ class ElemXpath(enum.Enum):
 
 class Iphone:
     def __init__(self, name, memory, color, price):
-        self.__name = name
-        self.__memory = memory
-        self.__color = color
-        self.__price = price
+        self.name = name
+        self.memory = memory
+        self.color = color
+        self.price = price
 
 
 def init_driver(headless):
@@ -38,16 +38,50 @@ def get_page_count(driver):
 
 
 def get_products_info(driver):
-    return driver.find_elements(By.XPATH, ElemXpath.product_info.value)
+    products_info = driver.find_elements(By.XPATH, ElemXpath.product_info.value)
+    return [product_info.text for product_info in products_info]
+
+
+def norm_price(price):
+    price = price.replace(' ', '')
+    price = price.replace('руб.', '')
+    return int(price)
 
 
 def get_products_price(driver):
-    return driver.find_elements(By.XPATH, ElemXpath.product_price.value)
+    products_price = driver.find_elements(By.XPATH, ElemXpath.product_price.value)
+    return [norm_price(product_price.text) for product_price in products_price]
+
+
+def extract_name_from_product_info(product_info):
+    ind = product_info.find(' ')
+    ind = product_info.find(' ', ind + 1)
+    ind = product_info.find(' ', ind + 1)
+    return product_info[0:ind]
+
+
+def extract_memory_from_product_info(product_info):
+    ind = product_info.find('GB')
+    ind_left = product_info.rfind(' ', 0, ind)
+    ind_right = product_info.find(' ', ind_left + 1)
+    return product_info[ind_left:ind_right]
+
+
+def extract_color_from_product_info(product_info):
+    ind_left = product_info.find('(')
+    ind_right = product_info.find(')', ind_left)
+    return product_info[ind_left + 1:ind_right]
 
 
 def parsing_products_info(products_info, products_price):
-    for product_info, product_price in enumerate(products_info, products_price):
-
+    products = []
+    for product_info, product_price in zip(products_info, products_price):
+        name = extract_name_from_product_info(product_info)
+        memory = extract_memory_from_product_info(product_info)
+        color = extract_color_from_product_info(product_info)
+        iphone = Iphone(name, memory, color, product_price)
+        products.append(iphone)
+    return products
 
 
 def main():
@@ -56,10 +90,9 @@ def main():
     page_count = get_page_count(driver)
     products_info = get_products_info(driver)
     products_price = get_products_price(driver)
-    for i in range(len(products_info)):
-        print(products_info[i].text)
-        print(products_price[i].text)
-
+    products = parsing_products_info(products_info, products_price)
+    for product in products:
+        print(f'Name: {product.name}, Memory: {product.memory}, Color: {product.color}, Price: {product.price}\n')
 
 if __name__ == '__main__':
     main()
