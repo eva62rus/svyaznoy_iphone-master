@@ -8,6 +8,11 @@ class Queries(enum.Enum):
                           'id INT AUTO_INCREMENT PRIMARY KEY,' \
                           'name VARCHAR(100),' \
                           'memory INT,' \
-                          'color VARCHAR(100))'
-    show_table = 'DESCRIBE iphone'
+                          'color VARCHAR(100),' \
+                          'price INT)'
+    show_table_iphone = 'DESCRIBE iphone'
+    delete_table_iphone = 'DROP TABLE iphone'
+    insert_iphones = 'INSERT INTO iphone' \
+                     '(name, memory, color, price)' \
+                     'VALUES(%s, %s, %s, %s)'
 

@@ -23,14 +23,6 @@ class ElemXpath(enum.Enum):
     product_price = "//span[contains(@class, 'b-product-block__visible-price ')]"
 
 
-class Iphone:
-    def __init__(self, name, memory, color, price):
-        self.name = name
-        self.memory = memory
-        self.color = color
-        self.price = price
-
-
 def init_driver(headless, profile_path=None, profile_dir_name=None):
     options = Options()
     if profile_path is not None and profile_dir_name is not None:
@@ -94,11 +86,11 @@ def parsing_products_info(products_info, products_price):
         name = extract_name_from_product_info(product_info)
         memory = extract_memory_from_product_info(product_info)
         color = extract_color_from_product_info(product_info)
-        products.append(Iphone(name, memory, color, product_price))
+        products.append((name, memory, color, product_price))
     return products
 
 
-def connect_to_db():
+def update_db(products):
     try:
         with connect(
                 host='localhost',
@@ -106,27 +98,29 @@ def connect_to_db():
                 password=DB_PASS,
                 database=DB_NAME
         ) as connection:
-            return connection
+            with connection.cursor() as cursor:
+                cursor.executemany(Queries.insert_iphones.value, products)
+                connection.commit()
     except Error as e:
         print(e)
 
 
 def main():
-    driver = init_driver(False, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
+    driver = init_driver(True, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
     driver.get(SRC_URL)
+    sleep(1)
     page_count = get_page_count(driver)
     urls = [get_url_for_page(i) for i in range(1, page_count + 1)]
     products = []
     for url in urls:
         if url != SRC_URL:
             driver.get(url)
+            sleep(1)
         products_info = get_products_info(driver)
         products_price = get_products_price(driver)
         products += parsing_products_info(products_info, products_price)
     print(len(products))
-    with open('products.txt', 'a') as f:
-        for product in products:
-            f.write(f'Name: {product.name}, Price: {product.price}, Color: {product.color}, Mem: {product.memory}\n')
+    update_db(products)
 
 
 if __name__ == '__main__':

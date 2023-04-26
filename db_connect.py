@@ -9,9 +9,10 @@ try:
             database='svyaznoy_iphone_data'
     ) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(Queries.show_table.value)
+            cursor.execute(Queries.show_table_iphone.value)
             res = cursor.fetchall()
             for row in res:
                 print(row)
+
 except Error as e:
     print(e)
