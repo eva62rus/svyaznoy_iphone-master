@@ -5,11 +5,16 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 import enum
+from mysql.connector import connect, Error
+from queries import Queries
 
 SRC_URL = 'https://www.svyaznoy.ru/catalog/phone/225/apple'
 CHROME_DRIVER_PATH = '../chrome-driver/chromedriver.exe'
 CHROME_PROFILE_PATH = r"user-data-dir=C:\\Users\\Victor\\AppData\\Local\\Google\\Chrome\\User Data\\"
 CHROME_PROFILE_DIR_NAME = '--profile-directory=Default'
+DB_USER = 'root'
+DB_PASS = '1111'
+DB_NAME = 'svyaznoy_iphone_data'
 
 
 class ElemXpath(enum.Enum):
@@ -89,9 +94,21 @@ def parsing_products_info(products_info, products_price):
         name = extract_name_from_product_info(product_info)
         memory = extract_memory_from_product_info(product_info)
         color = extract_color_from_product_info(product_info)
-        iphone = Iphone(name, memory, color, product_price)
-        products.append(iphone)
+        products.append(Iphone(name, memory, color, product_price))
     return products
+
+
+def connect_to_db():
+    try:
+        with connect(
+                host='localhost',
+                user=DB_USER,
+                password=DB_PASS,
+                database=DB_NAME
+        ) as connection:
+            return connection
+    except Error as e:
+        print(e)
 
 
 def main():
@@ -103,7 +120,6 @@ def main():
     for url in urls:
         if url != SRC_URL:
             driver.get(url)
-
         products_info = get_products_info(driver)
         products_price = get_products_price(driver)
         products += parsing_products_info(products_info, products_price)
