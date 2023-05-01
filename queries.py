@@ -15,6 +15,6 @@ class Queries(enum.Enum):
     insert_iphones = 'INSERT INTO iphone' \
                      '(name, memory, color, price)' \
                      'VALUES(%s, %s, %s, %s)'
-    get_all_iphones = 'SELECT * FROM iphone'
+    get_all_iphones = 'SELECT name, memory, color, price FROM iphone'
     remove_all_iphones = 'DELETE FROM iphone'
 
