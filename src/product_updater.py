@@ -10,7 +10,7 @@ from queries import Queries
 
 SRC_URL = 'https://www.svyaznoy.ru/catalog/phone/225/apple'
 CHROME_DRIVER_PATH = '../chrome-driver/chromedriver.exe'
-CHROME_PROFILE_PATH = r"user-data-dir=C:\\Users\\Victor\\AppData\\Local\\Google\\Chrome\\User Data\\"
+CHROME_PROFILE_PATH = r"user-data-dir=C:\\Users\\йцу\\AppData\\Local\\Google\\Chrome\\User Data\\"
 CHROME_PROFILE_DIR_NAME = '--profile-directory=Default'
 DB_USER = 'root'
 DB_PASS = '1111'
@@ -61,22 +61,28 @@ def get_products_price(driver):
 
 
 def extract_name_from_product_info(product_info):
-    ind = product_info.find(' ')
-    ind = product_info.find(' ', ind + 1)
-    ind = product_info.find(' ', ind + 1)
-    return product_info[0:ind]
+    ind = product_info.find('GB')
+    if ind == -1:
+        ind = product_info.find('TB')
+    ind_right = product_info.rfind(' ', 0, ind)
+    return product_info[0:ind_right]
 
 
 def extract_memory_from_product_info(product_info):
     ind = product_info.find('GB')
+    if ind == -1:
+        ind = product_info.find('TB')
     ind_left = product_info.rfind(' ', 0, ind)
     ind_right = product_info.find(' ', ind_left + 1)
     return product_info[ind_left:ind_right]
 
 
 def extract_color_from_product_info(product_info):
-    ind_left = product_info.find('(')
-    ind_right = product_info.find(')', ind_left)
+    if product_info.find('PRODUCT') != -1:
+        return 'красный'
+    else:
+        ind_left = product_info.find('(')
+        ind_right = product_info.find(')', ind_left)
     return product_info[ind_left + 1:ind_right]
 
 
@@ -105,6 +111,22 @@ def update_db(products):
         print(e)
 
 
+def get_products_from_db():
+    try:
+        with connect(
+                host='localhost',
+                user=DB_USER,
+                password=DB_PASS,
+                database=DB_NAME
+        ) as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(Queries.get_all_iphones.value)
+                res = cursor.fetchall()
+                return res
+    except Error as e:
+        print(e)
+
+
 def main():
     driver = init_driver(True, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
     driver.get(SRC_URL)
@@ -120,7 +142,9 @@ def main():
         products_price = get_products_price(driver)
         products += parsing_products_info(products_info, products_price)
     print(len(products))
-    update_db(products)
+    db_products = get_products_from_db()
+    a = 1
+    # update_db(products)
 
 
 if __name__ == '__main__':
