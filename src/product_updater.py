@@ -1,8 +1,8 @@
+from time import sleep
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
-from time import sleep
 import enum
 from mysql.connector import connect, Error, errorcode
 from queries import Queries
@@ -23,14 +23,6 @@ class ElemXpath(enum.Enum):
     PRODUCT_PRICE = "//span[contains(@class, 'b-product-block__visible-price ')]"
 
 
-class Msg(enum.Enum):
-    DB_NOT_UPD = 'No change found.'
-    DB_UPD = 'Database updated successful.'
-    DB_ERR_USERPASS = 'Invalid username or password specified...'
-    DB_NOT_FOUND = 'Database does not exist.'
-    ERR_GET_PAGE_COUNT = 'Failed to determine the number of pages.'
-
-
 class MyDb:
     __host = None
     __user = None
@@ -45,7 +37,7 @@ class MyDb:
         self.__password = password
         self.__database = database
 
-    def _open_connection(self):
+    def __open_connection(self):
         try:
             self.__connection = connect(
                 host=self.__host,
@@ -62,74 +54,85 @@ class MyDb:
             else:
                 print(e)
 
-    def _close_connection(self):
+    def __close_connection(self):
         self.__session.close()
         self.__connection.close()
 
-    def insert_products(self, products):
-        self._open_connection()
+    def __insert_products(self, products):
+        self.__open_connection()
         self.__session.executemany(Queries.INSERT_IPHONES.value, products)
         self.__connection.commit()
-        self._close_connection()
+        self.__close_connection()
 
-    def read_products(self):
-        self._open_connection()
+    def __read_products(self):
+        self.__open_connection()
         self.__session.execute(Queries.GET_IPHONES.value)
         products = self.__session.fetchall()
-        self._close_connection()
+        self.__close_connection()
         return products
 
-    def remove_all_products(self):
-        self._open_connection()
+    def __remove_all_products(self):
+        self.__open_connection()
         self.__session.execute(Queries.REMOVE_IPHONES.value)
         self.__connection.commit()
-        self._close_connection()
+        self.__close_connection()
 
     def update_db(self, products):
-        current_products = self.read_products()
+        current_products = self.__read_products()
         if sorted(current_products) == sorted(products):
             print(Msg.DB_NOT_UPD.value)
         else:
-            self.remove_all_products()
-            self.insert_products(products)
+            self.__remove_all_products()
+            self.__insert_products(products)
             print(Msg.DB_UPD.value)
 
 
-def init_driver(headless, profile_path=None, profile_dir_name=None):
-    options = Options()
-    if profile_path is not None and profile_dir_name is not None:
-        options.add_argument(profile_path)
-        options.add_argument(profile_dir_name)
-    if headless:
-        options.add_argument('--headless=new')
-    return webdriver.Chrome(options=options)
+class SvyaznoyParser:
+    __driver = None
+
+    def __init__(self, profile_path=None, profile_dir_name=None, headlees=True):
+        options = Options()
+        if profile_path is not None and profile_dir_name is not None:
+            options.add_argument(profile_path)
+            options.add_argument(profile_dir_name)
+        if headlees:
+            options.add_argument('--headless=new')
+        self.__driver = webdriver.Chrome(options=options)
+
+    def get_page(self, url):
+        self.__driver.get(url)
+
+    def get_page_count(self):
+        try:
+            return int(self.__driver.find_element(By.XPATH, ElemXpath.NEXT_PAGE.value).text)
+        except NoSuchElementException:
+            print(Msg.ERR_GET_PAGE_COUNT)
+
+    def get_products_info(self):
+        products_info = self.__driver.find_elements(By.XPATH, ElemXpath.PRODUCT_INFO.value)
+        return [product_info.text for product_info in products_info]
+
+    def get_products_prices(self):
+        products_prices = self.__driver.find_elements(By.XPATH, ElemXpath.PRODUCT_PRICE.value)
+        return [norm_price(product_price.text) for product_price in products_prices]
 
 
-def get_page_count(driver):
-    try:
-        return int(driver.find_element(By.XPATH, ElemXpath.NEXT_PAGE.value).text)
-    except NoSuchElementException:
-        print(Msg.ERR_GET_PAGE_COUNT.value)
+class Msg(enum.Enum):
+    DB_NOT_UPD = 'No change found.'
+    DB_UPD = 'Database updated successful.'
+    DB_ERR_USERPASS = 'Invalid username or password specified...'
+    DB_NOT_FOUND = 'Database does not exist.'
+    ERR_GET_PAGE_COUNT = 'Failed to determine the number of pages.'
 
 
 def get_url_for_page(page_num):
     return SRC_URL + '/page-' + str(page_num)
 
 
-def get_products_info(driver):
-    products_info = driver.find_elements(By.XPATH, ElemXpath.PRODUCT_INFO.value)
-    return [product_info.text for product_info in products_info]
-
-
 def norm_price(price):
     price = price.replace(' ', '')
     price = price.replace('руб.', '')
     return int(price)
-
-
-def get_products_price(driver):
-    products_price = driver.find_elements(By.XPATH, ElemXpath.PRODUCT_PRICE.value)
-    return [norm_price(product_price.text) for product_price in products_price]
 
 
 def extract_name_from_product_info(product_info):
@@ -169,20 +172,19 @@ def parsing_products_info(products_info, products_price):
 
 
 def main():
-    driver = init_driver(True, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
-    driver.get(SRC_URL)
-    sleep(1)
-    page_count = get_page_count(driver)
+    svyazoy_parser = SvyaznoyParser(CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME, True)
+    svyazoy_parser.get_page(SRC_URL)
+    page_count = svyazoy_parser.get_page_count()
     urls = [get_url_for_page(i) for i in range(1, page_count + 1)]
     products = []
     for url in urls:
         if url != SRC_URL:
-            driver.get(url)
+            svyazoy_parser.get_page(url)
             sleep(1)
-        products_info = get_products_info(driver)
-        products_price = get_products_price(driver)
-        products += parsing_products_info(products_info, products_price)
-    print(len(products))
+        products_info = svyazoy_parser.get_products_info()
+        products_prices = svyazoy_parser.get_products_prices()
+        products += parsing_products_info(products_info, products_prices)
+    print(f'total porducts count: {len(products)}.')
     connection = MyDb(DB_HOST, DB_USER, DB_PASS, DB_NAME)
     connection.update_db(products)
 
