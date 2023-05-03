@@ -17,6 +17,14 @@ DB_PASS = '1111'
 DB_NAME = 'svyaznoy_iphone_data'
 
 
+class Msg(enum.Enum):
+    DB_NOT_UPD = 'No change found.'
+    DB_UPD = 'Database updated successful.'
+    DB_ERR_USERPASS = 'Invalid username or password specified...'
+    DB_NOT_FOUND = 'Database does not exist.'
+    ERR_GET_PAGE_COUNT = 'Failed to determine the number of pages.'
+
+
 class ElemXpath(enum.Enum):
     NEXT_PAGE = "//li[contains(@class, 'last')]"
     PRODUCT_INFO = "//span[contains(@class, 'b-product-block__name')]"
@@ -115,14 +123,6 @@ class SvyaznoyParser:
     def get_products_prices(self):
         products_prices = self.__driver.find_elements(By.XPATH, ElemXpath.PRODUCT_PRICE.value)
         return [norm_price(product_price.text) for product_price in products_prices]
-
-
-class Msg(enum.Enum):
-    DB_NOT_UPD = 'No change found.'
-    DB_UPD = 'Database updated successful.'
-    DB_ERR_USERPASS = 'Invalid username or password specified...'
-    DB_NOT_FOUND = 'Database does not exist.'
-    ERR_GET_PAGE_COUNT = 'Failed to determine the number of pages.'
 
 
 def get_url_for_page(page_num):
