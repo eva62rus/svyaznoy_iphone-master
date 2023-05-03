@@ -9,7 +9,7 @@ try:
             database='svyaznoy_iphone_data'
     ) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(Queries.get_all_iphones.value)
+            cursor.execute(Queries.GET_IPHONES.value)
             res = cursor.fetchall()
             for row in res:
                 print(row)

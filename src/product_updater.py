@@ -32,34 +32,28 @@ class Msg(enum.Enum):
 
 
 class MyDb:
-    _instance = None
-    _host = None
-    _user = None
-    _password = None
-    _database = None
-    _connection = None
-    _session = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(MyDb, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
+    __host = None
+    __user = None
+    __password = None
+    __database = None
+    __connection = None
+    __session = None
 
     def __init__(self, host, user, password, database):
-        self._host = host
-        self._user = user
-        self._password = password
-        self._database = database
+        self.__host = host
+        self.__user = user
+        self.__password = password
+        self.__database = database
 
     def _open_connection(self):
         try:
-            self._connection = connect(
-                host=self._host,
-                user=self._user,
-                password=self._password,
-                database=self._database
+            self.__connection = connect(
+                host=self.__host,
+                user=self.__user,
+                password=self.__password,
+                database=self.__database
             )
-            self._session = self._connection.cursor()
+            self.__session = self.__connection.cursor()
         except Error as e:
             if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print(Msg.DB_ERR_USERPASS.value)
@@ -69,26 +63,26 @@ class MyDb:
                 print(e)
 
     def _close_connection(self):
-        self._session.close()
-        self._connection.close()
+        self.__session.close()
+        self.__connection.close()
 
     def insert_products(self, products):
         self._open_connection()
-        self._session.executemany(Queries.insert_iphones.value, products)
-        self._connection.commit()
+        self.__session.executemany(Queries.INSERT_IPHONES.value, products)
+        self.__connection.commit()
         self._close_connection()
 
     def read_products(self):
         self._open_connection()
-        self._session.execute(Queries.get_all_iphones.value)
-        products = self._session.fetchall()
+        self.__session.execute(Queries.GET_IPHONES.value)
+        products = self.__session.fetchall()
         self._close_connection()
         return products
 
     def remove_all_products(self):
         self._open_connection()
-        self._session.execute(Queries.remove_all_iphones.value)
-        self._connection.commit()
+        self.__session.execute(Queries.REMOVE_IPHONES.value)
+        self.__connection.commit()
         self._close_connection()
 
     def update_db(self, products):
@@ -174,63 +168,6 @@ def parsing_products_info(products_info, products_price):
     return products
 
 
-def write_products_to_db(products):
-    try:
-        with connect(
-                host='localhost',
-                user=DB_USER,
-                password=DB_PASS,
-                database=DB_NAME
-        ) as connection:
-            with connection.cursor() as cursor:
-                cursor.executemany(Queries.insert_iphones.value, products)
-                connection.commit()
-    except Error as e:
-        print(e)
-
-
-def get_products_from_db():
-    try:
-        with connect(
-                host='localhost',
-                user=DB_USER,
-                password=DB_PASS,
-                database=DB_NAME
-        ) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(Queries.get_all_iphones.value)
-                res = cursor.fetchall()
-                return res
-    except Error as e:
-        print(e)
-
-
-def remove_products_from_db():
-    try:
-        with connect(
-                host='localhost',
-                user=DB_USER,
-                password=DB_PASS,
-                database=DB_NAME
-        ) as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(Queries.remove_all_iphones.value)
-                connection.commit()
-    except Error as e:
-        print(e)
-
-
-def update_db(products):
-    db_products = get_products_from_db()
-    if sorted(db_products) == sorted(products):
-        print('No changes found.')
-        return
-    else:
-        remove_products_from_db()
-        write_products_to_db(products)
-        print('Database updated.')
-
-
 def main():
     driver = init_driver(True, CHROME_PROFILE_PATH, CHROME_PROFILE_DIR_NAME)
     driver.get(SRC_URL)
@@ -246,7 +183,8 @@ def main():
         products_price = get_products_price(driver)
         products += parsing_products_info(products_info, products_price)
     print(len(products))
-    update_db(products)
+    connection = MyDb(DB_HOST, DB_USER, DB_PASS, DB_NAME)
+    connection.update_db(products)
 
 
 if __name__ == '__main__':

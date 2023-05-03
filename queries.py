@@ -2,19 +2,19 @@ import enum
 
 
 class Queries(enum.Enum):
-    create_database = 'CREATE DATABASE svyaznoy_iphone_data'
-    show_databases = 'SHOW DATABASES'
-    create_table_iphone = 'CREATE TABLE iphone(' \
+    CREATE_DB = 'CREATE DATABASE svyaznoy_iphone_data'
+    VIEW_ALL_DB = 'SHOW DATABASES'
+    CREATE_TABLE_IPHONE = 'CREATE TABLE iphone(' \
                           'id INT AUTO_INCREMENT PRIMARY KEY,' \
                           'name VARCHAR(100),' \
                           'memory VARCHAR(100),' \
                           'color VARCHAR(100),' \
                           'price INT)'
-    show_table_iphone = 'DESCRIBE iphone'
-    delete_table_iphone = 'DROP TABLE iphone'
-    insert_iphones = 'INSERT INTO iphone' \
+    VIEW_TABLE_IPHONE = 'DESCRIBE iphone'
+    REMOVE_TABLE_IPHONE = 'DROP TABLE iphone'
+    INSERT_IPHONES = 'INSERT INTO iphone' \
                      '(name, memory, color, price)' \
                      'VALUES(%s, %s, %s, %s)'
-    get_all_iphones = 'SELECT name, memory, color, price FROM iphone'
-    remove_all_iphones = 'DELETE FROM iphone'
+    GET_IPHONES = 'SELECT name, memory, color, price FROM iphone'
+    REMOVE_IPHONES = 'DELETE FROM iphone'
 
