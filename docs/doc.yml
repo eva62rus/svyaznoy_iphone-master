@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: product-query
+  description: |
+    Сервис для получения цен на iPhone
+  version: 0.0.1
+servers:
+  - url: http://127.0.0.1:8765
+    description: Local server
+
+paths:
+  /products:
+    get:
+      summary: Получение всей информации о продуктах
+      description: |
+        Получение всей информации о продуктах.
+      responses:
+        "200":
+          $ref: "#/components/responses/ProductsArray"
+
+    post:
+      summary: Получение информации о продуктах по критериям
+      description: |
+        Получение всей информации о продуктах по критериям.
+      requestBody:
+        description: Параметры запроса
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductsBody"
+      responses:
+        "200":
+          $ref: "#/components/responses/ProductsArray"
+
+components:
+  schemas:
+    ProductInfo:
+      description: Информация о продукте
+      type: object
+      required:
+        - name
+        - memory
+        - color
+        - price
+      properties:
+        name:
+          description: Название
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: iPhone 11 Pro Max
+        memory:
+          description: ОЗУ
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: 64GB
+        color:
+          description: Цвет
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: black
+        price:
+          description: Цена
+          type: number
+          example: 59990
+
+    ProductsBody:
+      description: Параметры запроса информации о продуктах
+      type: object
+      properties:
+        name:
+          description: Название
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: iPhone 11 Pro Max
+        memory:
+          description: ОЗУ
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: 64GB
+        color:
+          description: Цвет
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: black
+        min_price:
+          description: Цена
+          type: number
+          example: 10000
+        max_price:
+          description: Цена
+          type: number
+          example: 59990
+
+  responses:
+    ProductInfo:
+      description: Ответ с информацией о продукте
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProductInfo"
+    ProductsArray:
+      description: Ответ с информацией о продуктах
+      content:
+        application/json:
+          schema:
+            description: Объект с информацией о продуктах
+            type: object
+            required:
+              - products
+            properties:
+              products:
+                description: Cпискок продуктов
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductInfo"
