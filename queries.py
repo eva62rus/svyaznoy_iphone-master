@@ -2,9 +2,9 @@ import enum
 
 
 class Queries(enum.Enum):
-    CREATE_DB = 'CREATE DATABASE svyaznoy_iphone_data'
+    CREATE_DB = 'CREATE DATABASE IF NOT EXISTS svyaznoy_iphone_data'
     VIEW_ALL_DB = 'SHOW DATABASES'
-    CREATE_TABLE_IPHONE = 'CREATE TABLE iphone(' \
+    CREATE_TABLE_IPHONE = 'CREATE TABLE IF NOT EXISTS iphone(' \
                           'id INT AUTO_INCREMENT PRIMARY KEY,' \
                           'name VARCHAR(100),' \
                           'memory VARCHAR(100),' \

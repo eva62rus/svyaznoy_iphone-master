@@ -11,10 +11,11 @@ SRC_URL = 'https://www.svyaznoy.ru/catalog/phone/225/apple'
 CHROME_DRIVER_PATH = '../chrome-driver/chromedriver.exe'
 CHROME_PROFILE_PATH = r"user-data-dir=C:\\Users\\Victor\\AppData\\Local\\Google\\Chrome\\User Data\\"
 CHROME_PROFILE_DIR_NAME = '--profile-directory=Default'
-DB_HOST = 'localhost'
+DB_HOST = '127.0.0.1'
 DB_USER = 'root'
 DB_PASS = '1111'
 DB_NAME = 'svyaznoy_iphone_data'
+DB_PORT = '8080'
 
 
 class Msg(enum.Enum):
@@ -36,14 +37,18 @@ class MyDb:
     __user = None
     __password = None
     __database = None
+    __port = None
     __connection = None
     __session = None
 
-    def __init__(self, host, user, password, database):
+    def __init__(self, host, user, password, database, port):
         self.__host = host
         self.__user = user
         self.__password = password
+        self.__port = port
+        self.__if_db_exists()
         self.__database = database
+        self.__if_table_iphone_exists()
 
     def __open_connection(self):
         try:
@@ -51,7 +56,8 @@ class MyDb:
                 host=self.__host,
                 user=self.__user,
                 password=self.__password,
-                database=self.__database
+                database=self.__database,
+                port=self.__port
             )
             self.__session = self.__connection.cursor()
         except Error as e:
@@ -65,6 +71,18 @@ class MyDb:
     def __close_connection(self):
         self.__session.close()
         self.__connection.close()
+
+    def __if_db_exists(self):
+        self.__open_connection()
+        self.__session.execute(Queries.CREATE_DB.value)
+        self.__connection.commit()
+        self.__close_connection()
+
+    def __if_table_iphone_exists(self):
+        self.__open_connection()
+        self.__session.execute(Queries.CREATE_TABLE_IPHONE.value)
+        self.__connection.commit()
+        self.__close_connection()
 
     def __insert_products(self, products):
         self.__open_connection()
@@ -185,7 +203,7 @@ def main():
         products_prices = svyazoy_parser.get_products_prices()
         products += parsing_products_info(products_info, products_prices)
     print(f'total porducts count: {len(products)}.')
-    connection = MyDb(DB_HOST, DB_USER, DB_PASS, DB_NAME)
+    connection = MyDb(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT)
     connection.update_db(products)
 
 
