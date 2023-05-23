@@ -5,10 +5,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 import enum
 from mysql.connector import connect, Error, errorcode
-from queries import Queries
+from src.queries import Queries
 
 SRC_URL = 'https://www.svyaznoy.ru/catalog/phone/225/apple'
-CHROME_DRIVER_PATH = '../chrome-driver/chromedriver.exe'
+CHROME_DRIVER_PATH = '../../chrome-driver/chromedriver.exe'
 CHROME_PROFILE_PATH = r"user-data-dir=C:\\Users\\Victor\\AppData\\Local\\Google\\Chrome\\User Data\\"
 CHROME_PROFILE_DIR_NAME = '--profile-directory=Default'
 DB_HOST = '127.0.0.1'
@@ -90,9 +90,12 @@ class MyDb:
         self.__connection.commit()
         self.__close_connection()
 
-    def __read_products(self):
+    def __read_products(self, criteria=None):
         self.__open_connection()
-        self.__session.execute(Queries.GET_IPHONES.value)
+        if criteria is None:
+            self.__session.execute(Queries.GET_IPHONES.value)
+        else:
+            self.__session.execute(Queries.GET_IPHONES_BY.value, criteria)
         products = self.__session.fetchall()
         self.__close_connection()
         return products
@@ -111,6 +114,9 @@ class MyDb:
             self.__remove_all_products()
             self.__insert_products(products)
             print(Msg.DB_UPD.value)
+
+    def get_products(self, criteria=None):
+        return self.__read_products(criteria)
 
 
 class SvyaznoyParser:

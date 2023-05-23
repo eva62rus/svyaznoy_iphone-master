@@ -1,0 +1,32 @@
+
+docker exec -it mysql mysql -uroot -p
+ALTER USER 'root'@'localhost' IDENTIFIED BY '1111'
+
+;0_HGkqR%;Ek5_57ye98mNe*j,rUt5&4
+
+______________________________________________________
+mysql> SELECT host FROM mysql.user WHERE User = 'root';
++-----------+
+| host      |
++-----------+
+| localhost |
++-----------+
+1 row in set (0.02 sec)
+
+mysql> CREATE USER 'root'@'10.0.2.2' IDENTIFIED BY '1111';
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'10.0.2.2';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> SELECT host FROM mysql.user WHERE User = 'root';
++-----------+
+| host      |
++-----------+
+| 10.0.2.2  |
+| localhost |
++-----------+
+2 rows in set (0.00 sec)

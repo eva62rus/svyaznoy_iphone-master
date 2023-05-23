@@ -17,4 +17,8 @@ class Queries(enum.Enum):
                      'VALUES(%s, %s, %s, %s)'
     GET_IPHONES = 'SELECT name, memory, color, price FROM iphone'
     REMOVE_IPHONES = 'DELETE FROM iphone'
+    GET_IPHONES_BY = 'SELECT name, memory, color, price FROM iphone ' \
+                     'WHERE name=%s AND memory=%s AND color=%s ' \
+                     'AND price > %s AND price < %s'
+
 
