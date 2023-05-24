@@ -10,7 +10,7 @@ try:
             database='svyaznoy_iphone_data'
     ) as connection:
         with connection.cursor() as cursor:
-            cursor.execute(Queries.GET_IPHONES_BY.value, ('Apple iPhone 14 Plus', '512GB', 'белый', 120000, 127000))
+            cursor.execute(Queries.VIEW_ALL_DB.value)
             res = cursor.fetchall()
             for row in res:
                 print(row)

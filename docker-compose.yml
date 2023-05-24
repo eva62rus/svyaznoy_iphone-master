@@ -2,12 +2,10 @@ version: "3.1"
 services:
   product_query:
     container_name: product_query
-    build: app
+    build: product_query
     restart: always
     ports:
       - "8765:3306"
-    networks:
-      - backend
   db:
     image: mysql:latest
     restart: always

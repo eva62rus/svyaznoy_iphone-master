@@ -122,7 +122,7 @@ class MyDb:
 class SvyaznoyParser:
     __driver = None
 
-    def __init__(self, profile_path=None, profile_dir_name=None, headlees=True):
+    def __init__(self, profile_path=None, profile_dir_name=None, headlees=False):
         options = Options()
         if profile_path is not None and profile_dir_name is not None:
             options.add_argument(profile_path)

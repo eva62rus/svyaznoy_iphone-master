@@ -1,6 +1,12 @@
 from flask import Flask, jsonify, request
-from src.product_updater.product_updater \
-    import MyDb, DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT
+from src.product_updater.product_updater import MyDb
+
+DB_HOST = 'db'
+DB_USER = 'root'
+DB_PASS = '1111'
+DB_NAME = 'svyaznoy_iphone_data'
+DB_PORT = '3306'
+
 
 app = Flask(__name__)
 
