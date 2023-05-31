@@ -4,6 +4,8 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY '1111'
 
 ;0_HGkqR%;Ek5_57ye98mNe*j,rUt5&4
 
+cp /media/sf_ubuntu_share/docker-compose.yml /home/victor/app/
+cp /media/sf_ubuntu_share/product_query/Dockerfile /home/victor/app/product_query
 ______________________________________________________
 mysql> SELECT host FROM mysql.user WHERE User = 'root';
 +-----------+
@@ -30,3 +32,31 @@ mysql> SELECT host FROM mysql.user WHERE User = 'root';
 | localhost |
 +-----------+
 2 rows in set (0.00 sec)
+________________________________________________________________
+victor@server:~/app$ docker ps
+CONTAINER ID   IMAGE               COMMAND                  CREATED          STATUS          PORTS                                              NAMES
+7c3672f159c6   app_product_query   "python product_quer…"   30 minutes ago   Up 30 minutes   0.0.0.0:8765->3306/tcp, :::8765->3306/tcp          product_query
+d847125789f5   mysql:latest        "docker-entrypoint.s…"   30 minutes ago   Up 30 minutes   33060/tcp, 0.0.0.0:81->3306/tcp, :::81->3306/tcp   app_db_1
+______________________________________________________
+{
+  "name": "iPhone 11 Pro Max",
+  "memory": "64GB",
+  "color": "черный",
+  "min_price": 10000,
+  "max_price": 80000
+}
+______________________________________________________
+
+Докер в чистое состояние.
+# danger, read the entire text around this code before running
+# you will lose data
+sudo -s
+systemctl stop docker
+rm -rf /var/lib/docker
+systemctl start docker
+exit
+
+________________________________________________________________
+ncdu / - просмотр размеров файлов в директории
+______________________________________________________
+$ docker system prune –all –force  - очистка помогла запустить app_db_1

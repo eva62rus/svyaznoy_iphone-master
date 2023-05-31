@@ -50,6 +50,15 @@ class MyDb:
         self.__database = database
         self.__if_table_iphone_exists()
 
+    def db_connect_ctrl(func):
+        def wrapper(self, *args):
+            self.__open_connection()
+            f = func(self, *args)
+            self.__close_connection()
+            return f
+
+        return wrapper
+
     def __open_connection(self):
         try:
             self.__connection = connect(
@@ -72,39 +81,34 @@ class MyDb:
         self.__session.close()
         self.__connection.close()
 
+    @db_connect_ctrl
     def __if_db_exists(self):
-        self.__open_connection()
         self.__session.execute(Queries.CREATE_DB.value)
         self.__connection.commit()
-        self.__close_connection()
 
+    @db_connect_ctrl
     def __if_table_iphone_exists(self):
-        self.__open_connection()
         self.__session.execute(Queries.CREATE_TABLE_IPHONE.value)
         self.__connection.commit()
-        self.__close_connection()
 
+    @db_connect_ctrl
     def __insert_products(self, products):
-        self.__open_connection()
         self.__session.executemany(Queries.INSERT_IPHONES.value, products)
         self.__connection.commit()
-        self.__close_connection()
 
+    @db_connect_ctrl
     def __read_products(self, criteria=None):
-        self.__open_connection()
         if criteria is None:
             self.__session.execute(Queries.GET_IPHONES.value)
         else:
             self.__session.execute(Queries.GET_IPHONES_BY.value, criteria)
         products = self.__session.fetchall()
-        self.__close_connection()
         return products
 
+    @db_connect_ctrl
     def __remove_all_products(self):
-        self.__open_connection()
         self.__session.execute(Queries.REMOVE_IPHONES.value)
         self.__connection.commit()
-        self.__close_connection()
 
     def update_db(self, products):
         current_products = self.__read_products()
