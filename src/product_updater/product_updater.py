@@ -32,6 +32,16 @@ class ElemXpath(enum.Enum):
     PRODUCT_PRICE = "//span[contains(@class, 'b-product-block__visible-price ')]"
 
 
+def db_connect_ctrl(func):
+    def wrapper(self, *args, **kwargs):
+        self.open_connection()
+        f = func(*args, **kwargs)
+        self.close_connection()
+        return f
+
+    return wrapper
+
+
 class MyDb:
     __host = None
     __user = None
@@ -46,20 +56,11 @@ class MyDb:
         self.__user = user
         self.__password = password
         self.__port = port
-        self.__if_db_exists()
+        self.__if_db_exists(self)
         self.__database = database
-        self.__if_table_iphone_exists()
+        self.__if_table_iphone_exists(self)
 
-    def db_connect_ctrl(func):
-        def wrapper(self, *args):
-            self.__open_connection()
-            f = func(self, *args)
-            self.__close_connection()
-            return f
-
-        return wrapper
-
-    def __open_connection(self):
+    def open_connection(self):
         try:
             self.__connection = connect(
                 host=self.__host,
@@ -77,7 +78,7 @@ class MyDb:
             else:
                 print(e)
 
-    def __close_connection(self):
+    def close_connection(self):
         self.__session.close()
         self.__connection.close()
 
@@ -111,16 +112,16 @@ class MyDb:
         self.__connection.commit()
 
     def update_db(self, products):
-        current_products = self.__read_products()
+        current_products = self.__read_products(self)
         if sorted(current_products) == sorted(products):
             print(Msg.DB_NOT_UPD.value)
         else:
-            self.__remove_all_products()
-            self.__insert_products(products)
+            self.__remove_all_products(self)
+            self.__insert_products(self, products)
             print(Msg.DB_UPD.value)
 
     def get_products(self, criteria=None):
-        return self.__read_products(criteria)
+        return self.__read_products(self, criteria)
 
 
 class SvyaznoyParser:
