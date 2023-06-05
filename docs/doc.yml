@@ -33,8 +33,51 @@ paths:
         "200":
           $ref: "#/components/responses/ProductsArray"
 
+  /images/{image_id}:
+    get:
+      summary: Получение изображения по его ID
+      description: |
+        Получение изображения по его ID
+      parameters:
+        - name: image_id
+          in: path
+          description: ID изображения
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/Image"
+
 components:
   schemas:
+    Name:
+      description: Название
+      type: string
+      minLength: 2
+      maxLength: 100
+      example: iPhone 11 Pro Max
+    Memory:
+      description: ОЗУ
+      type: string
+      minLength: 2
+      maxLength: 100
+      example: 64GB
+    Color:
+      description: Цвет
+      type: string
+      minLength: 2
+      maxLength: 100
+      example: black
+    Price:
+      description: Цена
+      type: number
+      example: 59990
+    ImageId:
+      description: ID изображения
+      type: string
+      example: 3f4ddffb47fc
+
     ProductInfo:
       description: Информация о продукте
       type: object
@@ -45,50 +88,29 @@ components:
         - price
       properties:
         name:
-          description: Название
-          type: string
-          minLength: 2
-          maxLength: 100
-          example: iPhone 11 Pro Max
+          $ref: "#/components/schemas/Name"
         memory:
-          description: ОЗУ
-          type: string
-          minLength: 2
-          maxLength: 100
-          example: 64GB
+          $ref: "#/components/schemas/Memory"
         color:
-          description: Цвет
-          type: string
-          minLength: 2
-          maxLength: 100
-          example: black
+          $ref: "#/components/schemas/Color"
         price:
-          description: Цена
-          type: number
-          example: 59990
+          $ref: "#/components/schemas/Price"
+        image_ids:
+          description: ID изображений
+          type: array
+          items:
+            $ref: "#/components/schemas/ImageId"
 
     ProductsBody:
       description: Параметры запроса информации о продуктах
       type: object
       properties:
         name:
-          description: Название
-          type: string
-          minLength: 2
-          maxLength: 100
-          example: iPhone 11 Pro Max
+          $ref: "#/components/schemas/Name"
         memory:
-          description: ОЗУ
-          type: string
-          minLength: 2
-          maxLength: 100
-          example: 64GB
+          $ref: "#/components/schemas/Memory"
         color:
-          description: Цвет
-          type: string
-          minLength: 2
-          maxLength: 100
-          example: black
+          $ref: "#/components/schemas/Color"
         min_price:
           description: Цена
           type: number
@@ -120,3 +142,10 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/ProductInfo"
+    Image:
+      description: Ответ с изображением
+      content:
+        image/png:
+          schema:
+            type: string
+            format: binary
